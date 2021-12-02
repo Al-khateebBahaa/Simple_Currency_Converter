@@ -1,4 +1,4 @@
-package com.amirhusseinsoori.currencyconverter.util
+package com.bsa.currencyconverter.util
 
 import kotlinx.coroutines.CoroutineDispatcher
 

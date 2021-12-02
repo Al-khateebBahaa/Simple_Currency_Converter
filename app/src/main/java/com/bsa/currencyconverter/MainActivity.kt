@@ -1,4 +1,4 @@
-package com.amirhusseinsoori.currencyconverter
+package com.bsa.currencyconverter
 
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -6,18 +6,17 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import com.amirhusseinsoori.currencyconverter.databinding.ActivityMainBinding
-import com.amirhusseinsoori.currencyconverter.main.MainViewModel
+import bsa.currencyconverter.databinding.ActivityMainBinding
+import com.bsa.currencyconverter.main.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+
+
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    val url = "https://api.exchangeratesapi.io/latest"
     lateinit var binding: ActivityMainBinding
 
     private val viewModel: MainViewModel by viewModels()
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,12 +24,28 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
         binding.btnConverter.setOnClickListener {
-            viewModel.convert(
-                binding.etFrom.text.toString(), binding.spFromCurrency.selectedItem.toString(),
-                binding.spToCurrency.selectedItem.toString()
-            )
+            convertCurrency()
         }
+
+
+        binding.changeCurrency.setOnClickListener {
+
+            val fromValuePos = binding.spFromCurrency.selectedItemPosition
+
+            binding.spFromCurrency.setSelection(binding.spToCurrency.selectedItemPosition)
+            binding.spToCurrency.setSelection(fromValuePos)
+
+
+        }
+
+
+        launchCollector()
+
+    }
+
+    private fun launchCollector(){
 
         lifecycleScope.launchWhenStarted {
             viewModel.conversion.collect { event ->
@@ -56,7 +71,23 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
+
+
     }
+
+
+    private fun convertCurrency(){
+
+
+        viewModel.convert(
+            binding.etFrom.text.toString(),
+            binding.etTo.text.toString(),
+            binding.spFromCurrency.selectedItem.toString(),
+            binding.spToCurrency.selectedItem.toString()
+        )
+
+    }
+
 }
 
 

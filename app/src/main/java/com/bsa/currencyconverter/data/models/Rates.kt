@@ -1,4 +1,4 @@
-package com.amirhusseinsoori.currencyconverter.data.models
+package com.bsa.currencyconverter.data.models
 
 data class Rates(
     val AUD: Double,

@@ -1,4 +1,4 @@
-package com.amirhusseinsoori.currencyconverter.util
+package com.bsa.currencyconverter.util
 
 sealed class Resource<T>(val data:T?,val message:String?) {
     class Success<T>(data: T) :Resource<T>(data,null)

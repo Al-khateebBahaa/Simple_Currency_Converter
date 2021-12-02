@@ -1,4 +1,4 @@
-package com.amirhusseinsoori.currencyconverter
+package com.bsa.currencyconverter
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.amirhusseinsoori.currencyconverter", appContext.packageName)
+        assertEquals("com.bsa.currencyconverter", appContext.packageName)
     }
 }

@@ -1,22 +1,21 @@
-package com.amirhusseinsoori.currencyconverter.main
+package com.bsa.currencyconverter.main
 
-import android.view.KeyEvent
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.amirhusseinsoori.currencyconverter.data.models.Rates
-import com.amirhusseinsoori.currencyconverter.util.DispatcherProvider
-import com.amirhusseinsoori.currencyconverter.util.Resource
+import com.bsa.currencyconverter.data.models.Rates
+import com.bsa.currencyconverter.util.Resource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.Dispatcher
-import kotlin.math.round
+import javax.inject.Inject
+import kotlin.math.abs
 
-class MainViewModel @ViewModelInject constructor(
-        val repository: MainRepository,
-        val dispatcher: DispatcherProvider
+
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val repository: MainRepository
 ) : ViewModel() {
 
     sealed class CurrencyEvent {
@@ -31,14 +30,16 @@ class MainViewModel @ViewModelInject constructor(
     val conversion: StateFlow<CurrencyEvent> = _conversion
 
     fun convert(
-            amountStr: String,
-            fromCurrency: String,
-            toCurrency: String
+        frAmountStr: String,
+        toAmountStr: String,
+        fromCurrency: String,
+        toCurrency: String
     ) {
-        val fromAmount = amountStr.toFloatOrNull()
+        val fromAmount = frAmountStr.toFloatOrNull()
+        val toAmount = toAmountStr.toFloatOrNull()
 
         //if amount is empty
-        if (fromAmount == null) {
+        if (fromAmount == null && toAmount == null) {
             _conversion.value = CurrencyEvent.Failure("Not a Valid Amount")
             return
         }
@@ -47,21 +48,24 @@ class MainViewModel @ViewModelInject constructor(
             when (val rateResponse = repository.getRates(fromCurrency)) {
 
                 //Error Handel like network Connection
-                is Resource.Error -> _conversion.value = CurrencyEvent.Failure(rateResponse.message!!)
+                is Resource.Error -> _conversion.value =
+                    CurrencyEvent.Failure(rateResponse.message!!)
                 //Result Success
                 is Resource.Success -> {
                     val rates = rateResponse.data!!.rates
                     val rate = getRateForCurrency(toCurrency, rates)
-                    if (rate == null) {
-                        _conversion.value = CurrencyEvent.Failure("Unexpected error")
+                    val convertedCurrency = fromAmount!! * rate * 100 / 100
 
-                    } else {
-                        val convertedCurrency = round(fromAmount * rate * 100)/100
-                        _conversion.value=CurrencyEvent.Success(
-                                "$fromAmount  $fromCurrency =  $convertedCurrency  $toCurrency"
-                        )
+                    _conversion.value = CurrencyEvent.Success(
+                        "$fromAmount  $fromCurrency =  $convertedCurrency  $toCurrency \n" + "The difference =  ${
+                            String.format(
+                                "%.2f", abs(
+                                    toAmount!! - convertedCurrency
+                                )
+                            )
+                        }  $toCurrency"
+                    )
 
-                    }
 
                 }
             }
